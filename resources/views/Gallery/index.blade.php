@@ -1,6 +1,7 @@
 @extends('auth.layouts')
 
 @section('content')
+<link href="{{ asset('lightbox/dist/css/lightbox.min.css') }}" rel="stylesheet">
 <div class="row justify-content-center mt-5">
     <div class="col-md-8">
         <div class="card">
@@ -40,5 +41,5 @@
     </div>
 </div>
 
-<script src="{{ asset('js/lightbox.js') }}"></script>
+<script src="{{ asset('lightbox/dist/js/lightbox-plus-jquery.min.js') }}"></script>
 @endsection

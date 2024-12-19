@@ -79,6 +79,36 @@ class GalleryController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    // public function update(Request $request, $id)
+    // {
+    //     $this->validate($request, [
+    //         'title' => 'required|max:255',
+    //         'description' => 'required',
+    //         'picture' => 'image|nullable|max:1999'
+    //     ]);
+
+    //     $post = Post::find($id);
+    //     if ($request->hasFile('picture')) {
+    //         if ($post->picture != 'noimage.png') {
+    //             Storage::delete('public/posts/' . $post->picture); // Pastikan path sesuai
+    //         }
+
+    //         $filenameWithExt = $request->file('picture')->getClientOriginalName();
+    //         $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+    //         $extension = $request->file('picture')->getClientOriginalExtension();
+    //         $filenameToSave = $filename . '_' . time() . '.' . $extension;
+    //         // Menyimpan gambar di public/posts
+    //         $path = $request->file('picture')->storeAs('posts/', $filenameToSave);
+
+    //         $post->picture = $filenameToSave;
+    //     }
+
+    //     $post->title = $request->input('title');
+    //     $post->description = $request->input('description');
+    //     $post->save();
+
+    //     return redirect('gallery')->with('success', 'Data berhasil diperbarui');
+    // }
     public function update(Request $request, $id)
     {
         $this->validate($request, [
@@ -87,27 +117,42 @@ class GalleryController extends Controller
             'picture' => 'image|nullable|max:1999'
         ]);
 
+        // Mencari post berdasarkan ID
         $post = Post::find($id);
+        
+        // Mengecek apakah post ditemukan
+        if (!$post) {
+            return redirect('gallery')->with('error', 'Gallery item not found');
+        }
+
+        // Mengecek jika ada gambar baru yang di-upload
         if ($request->hasFile('picture')) {
-            if ($post->picture != 'noimage.png') {
-                Storage::delete('public/posts/' . $post->picture); // Pastikan path sesuai
+            // Menghapus gambar lama jika ada
+            if ($post->picture && $post->picture != 'noimage.png') {
+                // Menghapus gambar lama di storage
+                Storage::delete('public/posts/' . $post->picture);
             }
 
+            // Menyimpan gambar baru
             $filenameWithExt = $request->file('picture')->getClientOriginalName();
             $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
             $extension = $request->file('picture')->getClientOriginalExtension();
             $filenameToSave = $filename . '_' . time() . '.' . $extension;
-            // Menyimpan gambar di public/posts
-            $path = $request->file('picture')->storeAs('posts/', $filenameToSave);
+            
+            // Menyimpan gambar di storage
+            $path = $request->file('picture')->storeAs('posts', $filenameToSave, 'public');
 
+            // Menyimpan nama file gambar baru ke database
             $post->picture = $filenameToSave;
         }
 
+        // Memperbarui data lainnya
         $post->title = $request->input('title');
         $post->description = $request->input('description');
         $post->save();
 
-        return redirect('gallery')->with('success', 'Data berhasil diperbarui');
+        // Redirect ke halaman gallery dengan pesan sukses
+        return redirect()->route('gallery.index')->with('success', 'Data berhasil diperbarui');
     }
 
     /**
